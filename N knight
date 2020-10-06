@@ -1,0 +1,226 @@
+// C++ implementation of the above approach 
+#include <stdio.h> 
+//using namespace std; 
+  
+// Function to return the maximum number of 
+// knights that can be placed on the given 
+// chessboard such that no two 
+// knights attack each other 
+int max(int m, int n)
+{
+	if(m>=n)
+	return m;
+	else
+	return n;
+}
+
+int max_knight(int n, int m) 
+{ 
+  
+    // Check for corner case #1 
+    // If row or column is 1 
+    if (m == 1 || n == 1) { 
+  
+        // If yes, then simply print total blocks 
+        // which will be the max of row or column 
+        return max(m, n); 
+    } 
+  
+    // Check for corner case #2 
+    // If row or column is 2 
+    else if (m == 2 || n == 2) { 
+  
+        // If yes, then simply calculate 
+        // consecutive 2 rows or columns 
+        int c = 0; 
+        c = (max(m, n) / 4) * 4; 
+  
+        if (max(m, n) % 4 == 1) { 
+            c += 2; 
+        } 
+        else if (max(m, n) % 4 > 1) { 
+            c += 4; 
+        } 
+        return c; 
+    } 
+  
+    // For general case, just print the 
+    // half of total blocks 
+    else { 
+        return (((m * n) + 1) / 2); 
+    } 
+} 
+  
+/* m*n is the board dimension 
+k is the number of knights to be placed on board  
+count is the number of possible solutions */
+int m, n, k; 
+int count = 0; 
+  
+/* This function is used to create an empty m*n board */
+void makeBoard(char** board) 
+{ 
+    for (int i = 0; i < m; i++) { 
+        for (int j = 0; j < n; j++) { 
+            board[i][j] = '_'; 
+        } 
+    } 
+} 
+  
+/* This function displays our board */
+void displayBoard(char** board) 
+{ 
+
+	printf("\n\n");	  
+    for (int i = 0; i < m; i++) { 
+        for (int j = 0; j < n; j++) { 
+ 
+			printf(" %c ",board[i][j]);
+        } 
+
+        printf("\n");
+    } 
+} 
+  
+/* This function marks all the attacking 
+ position of a knight placed at board[i][j] 
+ position */
+void attack(int i, int j, char a, 
+            char** board) 
+{ 
+  
+    /* conditions to ensure that the  
+       block to be checked is inside the board */
+    if ((i + 2) < m && (j - 1) >= 0) { 
+        board[i + 2][j - 1] = a; 
+    } 
+    if ((i - 2) >= 0 && (j - 1) >= 0) { 
+        board[i - 2][j - 1] = a; 
+    } 
+    if ((i + 2) < m && (j + 1) < n) { 
+        board[i + 2][j + 1] = a; 
+    } 
+    if ((i - 2) >= 0 && (j + 1) < n) { 
+        board[i - 2][j + 1] = a; 
+    } 
+    if ((i + 1) < m && (j + 2) < n) { 
+        board[i + 1][j + 2] = a; 
+    } 
+    if ((i - 1) >= 0 && (j + 2) < n) { 
+        board[i - 1][j + 2] = a; 
+    } 
+    if ((i + 1) < m && (j - 2) >= 0) { 
+        board[i + 1][j - 2] = a; 
+    } 
+    if ((i - 1) >= 0 && (j - 2) >= 0) { 
+        board[i - 1][j - 2] = a; 
+    } 
+} 
+  
+/* If the position is empty, 
+   place the knight */
+int canPlace(int i, int j, char** board) 
+{ 
+    if (board[i][j] == '_') 
+        return 1; 
+    else
+        return 0; 
+} 
+  
+/* Place the knight at [i][j] position 
+   on board */
+void place(int i, int j, char k, char a, 
+           char** board, char** new_board) 
+{ 
+  
+    /* Copy the configurations of 
+     old board to new board */
+    for (int y = 0; y < m; y++) { 
+        for (int z = 0; z < n; z++) { 
+            new_board[y][z] = board[y][z]; 
+        } 
+    } 
+  
+    /* Place the knight at [i][j] 
+    position on new board */
+    new_board[i][j] = k; 
+  
+    /* Mark all the attacking positions 
+    of newly placed knight on the new board */
+    attack(i, j, a, new_board); 
+} 
+  
+/* Function for placing knights on board 
+   such that they don't attack each other */
+void kkn(int k, int sti, int stj, char** board) 
+{ 
+  
+    /* If there are no knights left to be placed, 
+     display the board and increment the count */
+    if (k == 0) { 
+        displayBoard(board); 
+        count++; 
+    } 
+    else { 
+  
+        /* Loop for checking all the  
+       positions on m*n board */
+        for (int i = sti; i < m; i++) { 
+            for (int j = stj; j < n; j++) { 
+  
+                /* Is it possible to place knight at  
+           [i][j] position on board? */
+                if (canPlace(i, j, board)) { 
+  
+                    /* Create a a new board and place the  
+                      new knight on it */
+                    char** new_board = new char*[m]; 
+                    for (int x = 0; x < m; x++) { 
+                        new_board[x] = new char[n]; 
+                    } 
+                    place(i, j, 'K', 'A', board, new_board); 
+  
+                    /* Call the function recursively for 
+                      (k-1) leftover knights */
+                    kkn(k - 1, i, j, new_board); 
+  
+                    /* Delete the new board  
+                    to free up the memory */
+                    for (int x = 0; x < m; x++) { 
+                        delete[] new_board[x]; 
+                    } 
+                    delete[] new_board; 
+                } 
+            } 
+            stj = 0; 
+        } 
+    } 
+} 
+  
+// Driver code 
+int main() 
+{ 
+	printf("******** N Knight problem ********\n\n\n");
+	printf("Enter size of matrix:");
+	scanf("%d",&n); 
+	m=n;
+
+	k=max_knight(n, m);
+	
+  
+    /* Creation of a m*n board */
+    char** board = new char*[m]; 
+    for (int i = 0; i < m; i++) { 
+        board[i] = new char[n]; 
+    } 
+  
+    /* Make all the places are empty */
+    makeBoard(board); 
+  
+    kkn(k, 0, 0, board); 
+    
+    printf("\nMaximum number of Knights are : %d",k);
+	printf("\nTotal number of solutions : %d",count); 
+	
+	return 0; 
+} 
